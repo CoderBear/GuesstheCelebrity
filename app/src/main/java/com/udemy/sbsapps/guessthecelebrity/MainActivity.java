@@ -5,7 +5,10 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,8 +27,20 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> celebNames = new ArrayList<>();
 
     int chosenCeleb = 0;
+    String[] answer = new String[4];
+    int locationOfCorrectAnswer;
 
     ImageView imageView;
+
+    Button button0, button1, button2, button3;
+
+    public void celebChosen(View view) {
+        if (view.getTag().toString().equals(Integer.toString(locationOfCorrectAnswer))) {
+            Toast.makeText(getApplicationContext(), "Correct!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "It was " + celebNames.get(chosenCeleb), Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public class ImageDownLoader extends  AsyncTask<String, Void, Bitmap>{
         @Override
@@ -88,6 +103,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         imageView = findViewById(R.id.imageView);
+        button0 = findViewById(R.id.button0);
+        button1 = findViewById(R.id.button1);
+        button2 = findViewById(R.id.button2);
+        button3 = findViewById(R.id.button3);
 
         task = new DownloadTask();
         String result = null;
@@ -118,6 +137,29 @@ public class MainActivity extends AppCompatActivity {
             Bitmap celebImage = imageTask.execute(celebURLs.get(chosenCeleb)).get();
 
             imageView.setImageBitmap(celebImage);
+
+            locationOfCorrectAnswer = rand.nextInt(4);
+
+            int incorrectAnswerLocation;
+
+            for (int i = 0; i < 4; i++) {
+                if (i == locationOfCorrectAnswer){
+                    answer[i] = celebNames.get(chosenCeleb);
+                } else {
+                    incorrectAnswerLocation = rand.nextInt(celebNames.size());
+
+                    while(incorrectAnswerLocation == chosenCeleb) {
+                        incorrectAnswerLocation = rand.nextInt(celebNames.size());
+                    }
+
+                    answer[i] = celebNames.get(incorrectAnswerLocation);
+                }
+            }
+
+            button0.setText(answer[0]);
+            button1.setText(answer[1]);
+            button2.setText(answer[2]);
+            button3.setText(answer[3]);
         } catch (Exception e) {
             e.printStackTrace();
         }
