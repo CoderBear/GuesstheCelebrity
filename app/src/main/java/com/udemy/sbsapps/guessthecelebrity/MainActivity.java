@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "It was " + celebNames.get(chosenCeleb), Toast.LENGTH_SHORT).show();
         }
+
+        newQueston();
     }
 
     public class ImageDownLoader extends  AsyncTask<String, Void, Bitmap>{
@@ -97,6 +100,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void newQueston() {
+        try {
+            Random rand = new Random();
+            chosenCeleb = rand.nextInt(celebNames.size());
+
+            ImageDownLoader imageTask = new ImageDownLoader();
+
+            Bitmap celebImage = imageTask.execute(celebURLs.get(chosenCeleb)).get();
+
+            imageView.setImageBitmap(celebImage);
+
+            locationOfCorrectAnswer = rand.nextInt(4);
+
+            int incorrectAnswerLocation;
+
+            for (int i = 0; i < 4; i++) {
+                if (i == locationOfCorrectAnswer){
+                    answer[i] = celebNames.get(chosenCeleb);
+                } else {
+                    incorrectAnswerLocation = rand.nextInt(celebNames.size());
+
+                    while(incorrectAnswerLocation == chosenCeleb) {
+                        incorrectAnswerLocation = rand.nextInt(celebNames.size());
+                    }
+
+                    answer[i] = celebNames.get(incorrectAnswerLocation);
+                }
+            }
+
+            button0.setText(answer[0]);
+            button1.setText(answer[1]);
+            button2.setText(answer[2]);
+            button3.setText(answer[3]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,37 +170,8 @@ public class MainActivity extends AppCompatActivity {
             while (m.find()){
                 celebNames.add(m.group(1));
             }
-            Random rand = new Random();
-            chosenCeleb = rand.nextInt(celebNames.size());
 
-            ImageDownLoader imageTask = new ImageDownLoader();
-
-            Bitmap celebImage = imageTask.execute(celebURLs.get(chosenCeleb)).get();
-
-            imageView.setImageBitmap(celebImage);
-
-            locationOfCorrectAnswer = rand.nextInt(4);
-
-            int incorrectAnswerLocation;
-
-            for (int i = 0; i < 4; i++) {
-                if (i == locationOfCorrectAnswer){
-                    answer[i] = celebNames.get(chosenCeleb);
-                } else {
-                    incorrectAnswerLocation = rand.nextInt(celebNames.size());
-
-                    while(incorrectAnswerLocation == chosenCeleb) {
-                        incorrectAnswerLocation = rand.nextInt(celebNames.size());
-                    }
-
-                    answer[i] = celebNames.get(incorrectAnswerLocation);
-                }
-            }
-
-            button0.setText(answer[0]);
-            button1.setText(answer[1]);
-            button2.setText(answer[2]);
-            button3.setText(answer[3]);
+            newQueston();
         } catch (Exception e) {
             e.printStackTrace();
         }
